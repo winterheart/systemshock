@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.11)
 
 project(shockolate VERSION 0.7.8)
 
@@ -26,6 +26,7 @@ option(ENABLE_DEBUG_BLIT "Enable debugging blitter" OFF)
 option(ENABLE_OPENGL "Enable OpenGL support" ON)
 option(ENABLE_SOUND "Enable sound support (requires SDL2_mixer)" ON)
 option(ENABLE_FLUIDSYNTH "Enable FluidSynth MIDI support" ON)
+option(ENABLE_FLUIDSYNTH_LITE "Use Lite version of FluidSynth from https://github.com/Doom64/fluidsynth-lite" OFF)
 
 # HAAAAX!!
 add_definitions(-DSVGA_SUPPORT)
@@ -64,11 +65,32 @@ if(ENABLE_SOUND)
 endif(ENABLE_SOUND)
 
 if(ENABLE_FLUIDSYNTH)
-	find_package(PkgConfig)
-	pkg_check_modules(FLUIDSYNTH REQUIRED fluidsynth)
+	if(ENABLE_FLUIDSYNTH_LITE)
+		include(FetchContent)
+		FetchContent_Declare(
+			fluidsynth-lite
+			GIT_REPOSITORY	https://github.com/Doom64/fluidsynth-lite
+			GIT_SHALLOW			ON
+			GIT_TAG					c539a8d9270ba5a3f7d6e460606483fc2ab1eb61	# 26.01.2020
+		)
+		FetchContent_GetProperties(fluidsynth-lite)
+		if(NOT fluidsynth-lite_POPULATED)
+			message(STATUS "Populating fluidsynth-lite...")
+			FetchContent_Populate(fluidsynth-lite)
+			add_subdirectory(${fluidsynth-lite_SOURCE_DIR} ${fluidsynth-lite_BINARY_DIR})
+			set_property(TARGET libfluidsynth PROPERTY C_STANDARD 11)
+			message(STATUS "Done.")
+		endif()
+		include_directories(BEFORE SYSTEM ${fluidsynth-lite_SOURCE_DIR}/include ${fluidsynth-lite_BINARY_DIR}/include)
+		list(APPEND SHOCK_LIBRARIES libfluidsynth)
+	else(ENABLE_FLUIDSYNTH_LITE)
+		# Use bulky system FluidSynth
+		find_package(PkgConfig)
+		pkg_check_modules(FLUIDSYNTH REQUIRED fluidsynth)
+		list(APPEND SHOCK_INCLUDES ${FLUIDSYNTH_INCLUDE_DIRS})
+		list(APPEND SHOCK_LIBRARIES ${FLUIDSYNTH_LIBRARIES})
+	endif()
 	add_definitions("-DUSE_FLUIDSYNTH")
-	list(APPEND SHOCK_INCLUDES ${FLUIDSYNTH_INCLUDE_DIRS})
-	list(APPEND SHOCK_LIBRARIES ${FLUIDSYNTH_LIBRARIES})
 endif(ENABLE_FLUIDSYNTH)
 
 if(NOT WIN32)
