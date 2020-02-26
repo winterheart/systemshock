@@ -10,11 +10,13 @@ class SystemShockConan(ConanFile):
 
     def configure(self):
         # Disable unused dependencies
-        self.options["sdl2"].shared = True
+        self.options["sdl2"].shared = False
+        if self.settings.os == "Linux":
+            self.options["sdl2"].jack = False
+            self.options["sdl2"].nas = False
+            self.options["sdl2"].pulse = False
+            self.options["sdl2_mixer"].tinymidi = False
 
-        self.options["sdl2"].jack = False
-        self.options["sdl2"].nas = False
-        self.options["sdl2"].pulse = False
         self.options["sdl2_mixer"].flac = False
         self.options["sdl2_mixer"].fluidsynth = False
         self.options["sdl2_mixer"].mad = False
@@ -23,9 +25,3 @@ class SystemShockConan(ConanFile):
         self.options["sdl2_mixer"].mpg123 = False
         self.options["sdl2_mixer"].ogg = False
         self.options["sdl2_mixer"].opus = False
-        self.options["sdl2_mixer"].tinymidi = False
-
-
-    def imports(self):
-        self.copy("*.dll", "", "bin")
-        self.copy("*.dylib*", "", "lib")

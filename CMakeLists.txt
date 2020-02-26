@@ -76,10 +76,10 @@ if(ENABLE_SOUND)
 		# FIXME applies only for *nix systems
 		find_package(PkgConfig)
 		pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer>=2.0.4)
-		add_definitions(-DUSE_SDL_MIXER)
 		list(APPEND SHOCK_INCLUDES ${SDL2_MIXER_INCLUDE_DIRS})
 		list(APPEND SHOCK_LIBRARIES ${SDL2_MIXER_LIBRARIES})
 	endif(ENABLE_CONAN_MANAGER)
+	add_definitions(-DUSE_SDL_MIXER)
 endif(ENABLE_SOUND)
 
 if(ENABLE_FLUIDSYNTH)
@@ -87,9 +87,10 @@ if(ENABLE_FLUIDSYNTH)
 		include(FetchContent)
 		FetchContent_Declare(
 			fluidsynth-lite
-			GIT_REPOSITORY	https://github.com/Doom64/fluidsynth-lite
-			GIT_SHALLOW			ON
-			GIT_TAG					c539a8d9270ba5a3f7d6e460606483fc2ab1eb61	# 26.01.2020
+			# For time being https://github.com/Doom64/fluidsynth-lite
+			GIT_REPOSITORY https://github.com/winterheart/fluidsynth-lite.git
+			GIT_SHALLOW	ON
+			GIT_TAG	a414e3055a652b5c8bb34b6e5b43e537468ccde6 # 26.01.2020
 		)
 		FetchContent_GetProperties(fluidsynth-lite)
 		if(NOT fluidsynth-lite_POPULATED)
